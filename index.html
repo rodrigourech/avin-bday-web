@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>AVIN. MASTER OF BOTH ENDS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0e0c0a; --ink-2: #1a1612; --paper: #f1e6cf; --paper-dim: #b9ab8f;
+    --sheet: #f6f1e7; --ffm: #c8102e; --ldn: #6a2fa0; --gold: #d6a531;
+    --bar: 56px; --foot: 44px;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--ink); color: var(--paper); overflow: hidden;
+    font-family: "Libre Baskerville", Georgia, serif; -webkit-font-smoothing: antialiased; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+  /* Top bar */
+  .top { position: fixed; inset: 0 0 auto 0; height: var(--bar); z-index: 20; background: #000;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 20px; }
+  .chap { font: 15px/1 "Bebas Neue", sans-serif; letter-spacing: .3em; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chap i { font: italic 17px/1 "Libre Baskerville", Georgia, serif; letter-spacing: 0; color: var(--paper); margin-left: 10px; }
+  .ctrl { display: flex; align-items: center; gap: 12px; flex: none; }
+  .count { font: 14px/1 "Bebas Neue", sans-serif; letter-spacing: .25em; color: var(--paper-dim); min-width: 56px; text-align: right; }
+  .mode { display: flex; border: 1px solid #4a4136; border-radius: 20px; overflow: hidden; }
+  .mode button { padding: 8px 14px; font: 14px/1 "Bebas Neue", sans-serif; letter-spacing: .25em; color: var(--paper-dim); }
+  .mode button[aria-pressed="true"] { background: var(--gold); color: var(--ink); }
+  .nav { width: 38px; height: 38px; border: 1px solid #6b5f4c; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; }
+  .nav.next { width: auto; padding: 0 16px; border-radius: 20px; border-color: var(--gold); color: var(--gold); font: 15px/1 "Bebas Neue", sans-serif; letter-spacing: .25em; }
+  .nav:disabled { opacity: .3; cursor: default; }
+
+  /* Stage */
+  .stage { position: fixed; left: 0; right: 0; top: var(--bar); bottom: var(--foot); }
+  .view { position: absolute; inset: 0; display: none; }
+  body[data-mode="book"] #book-view, body[data-mode="cinema"] #cinema-view { display: block; }
+
+  /* Book */
+  #book-view { background: radial-gradient(ellipse at 50% 40%, #3a2a1d 0, #1a120c 55%, #0b0806 100%); }
+  #book-view::before { content: ""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(92deg, rgba(255,255,255,.015) 0 3px, transparent 3px 9px); }
+  .book-wrap { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: min(94vw, calc((100vh - var(--bar) - var(--foot) - 40px) * 3), 1500px); transition: transform .9s ease; }
+  .book-wrap.front { transform: translate(-75%, -50%); }
+  .book-wrap.backside { transform: translate(-25%, -50%); }
+  @media (max-width: 760px) { .book-wrap.front, .book-wrap.backside { transform: translate(-50%, -50%); } .nav.next .txt { display: none; } }
+  .page { background: var(--sheet); overflow: hidden; }
+  .page .inner { position: absolute; inset: 0; padding: 2.2%; }
+  .page img.panel { width: 100%; height: 100%; object-fit: contain; display: block; background: #000; border: 2px solid #111; }
+  .page.hard { background: #2a0f14; }
+  .page.hard img.cover { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .page.back { background: linear-gradient(135deg, #3b0c12, #2a0f3c); display: flex; }
+  .page .pnum { position: absolute; bottom: .6%; width: 100%; text-align: center; font: 10px "Bebas Neue", sans-serif; letter-spacing: .2em; color: #8d846f; }
+
+  /* Shared card styles (chapter, wall, end) */
+  .card { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 4%; }
+  .card.chapter { background: var(--ink); color: var(--paper); }
+  .card .num { font: clamp(34px, 6.5vw, 120px)/.9 "Bebas Neue", sans-serif; letter-spacing: .04em;
+    background: linear-gradient(90deg, var(--ffm), var(--gold) 50%, var(--ldn)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .card .name { margin-top: 2.5%; font-size: clamp(13px, 1.7vw, 28px); font-style: italic; }
+  .card .rule { width: 18%; height: 2px; background: var(--paper-dim); opacity: .5; margin-top: 4%; }
+  .card.end { background: linear-gradient(135deg, #3b0c12, #2a0f3c); color: var(--paper); }
+  .card.end .date { font: clamp(16px, 2.2vw, 34px)/1.2 "Bebas Neue", sans-serif; letter-spacing: .35em; color: var(--gold); }
+  .card.end .small { margin-top: 3%; font-size: clamp(11px, 1.1vw, 16px); font-style: italic; color: var(--paper-dim); }
+
+  .card.wall { background: repeating-linear-gradient(0deg, #e9e2d3 0 2px, #e3dbca 2px 5px); color: #2a241d; justify-content: flex-start; padding: 3.5% 4% 4%; }
+  .wall h3 { margin: 0; font: clamp(16px, 2.2vw, 34px)/1 "Bebas Neue", sans-serif; letter-spacing: .08em; color: #1a1612; }
+  .wall .sub { margin: .6% 0 3%; font-size: clamp(9px, 1vw, 15px); font-style: italic; color: #3b332a; }
+  .wall .grid { width: 100%; flex: 1; display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(2, 1fr); gap: 5% 3%; min-height: 0; }
+  .photo { background: #fff; padding: 5% 5% 14%; box-shadow: 0 6px 12px rgba(0,0,0,.35); position: relative; min-height: 0; display: flex; }
+  .photo::before { content: ""; position: absolute; top: -5%; left: 50%; width: 9%; aspect-ratio: 1; margin-left: -4.5%; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ff6b6b, #8a0d0d); box-shadow: 0 2px 3px rgba(0,0,0,.5); }
+  .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .photo:nth-child(odd) { transform: rotate(-2.2deg); } .photo:nth-child(3n) { transform: rotate(1.8deg); } .photo:nth-child(4n) { transform: rotate(-.8deg); }
+
+  /* Unboxing: original photo in Avin's hands */
+  .unbox { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000; }
+  .unbox .tpl { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; display: block; }
+  .unbox .orig { position: absolute; object-fit: cover; display: block; }
+  .unbox.fallback { background: radial-gradient(ellipse at 50% 35%, #6b4d2e, #2b1d12 70%); display: flex; align-items: center; justify-content: center; }
+  .unbox.fallback .card-photo { height: 74%; aspect-ratio: 3 / 4; background: #fff; padding: 1.4% 1.4% 5%; box-shadow: 0 18px 30px rgba(0,0,0,.55); transform: rotate(-2deg); }
+  .unbox.fallback .card-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thought { position: absolute; right: 3%; top: 4%; max-width: 38%; background: #fff; color: #111; border: 2px solid #111;
+    border-radius: 22px; padding: 1.4% 1.8%; font: italic clamp(10px, 1.35vw, 22px)/1.35 "Libre Baskerville", Georgia, serif; box-shadow: 0 6px 0 #111; }
+  .thought::after { content: ""; position: absolute; left: 12%; bottom: -16px; width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 2px solid #111; }
+  .thought::before { content: ""; position: absolute; left: 6%; bottom: -30px; width: 8px; height: 8px; border-radius: 50%; background: #fff; border: 2px solid #111; }
+  .unbox-intro { position: absolute; right: 3%; bottom: 5%; background: #f3ead6; color: #111; border: 2px solid #111; padding: .8% 1.4%;
+    font: clamp(10px, 1.3vw, 20px)/1.3 "Libre Baskerville", Georgia, serif; font-weight: 700; }
+
+  .teaser { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000; }
+  .teaser img { position: absolute; inset: -4%; width: 108%; height: 108%; object-fit: cover; filter: brightness(.3) contrast(1.8) blur(6px) saturate(0); }
+  .teaser::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 45%, rgba(214,165,49,.18), transparent 60%); }
+  .teaser .t-text { position: absolute; left: 7%; right: 7%; top: 50%; transform: translateY(-50%); z-index: 1; text-align: center;
+    font: italic clamp(16px, 2.4vw, 40px)/1.35 "Libre Baskerville", Georgia, serif; color: var(--paper); text-shadow: 0 2px 18px #000; }
+  .teaser .t-turn { position: absolute; right: 5%; bottom: 6%; z-index: 1; font: clamp(11px, 1.1vw, 17px)/1 "Bebas Neue", sans-serif; letter-spacing: .3em; color: var(--gold);
+    animation: nudge 1.6s ease-in-out infinite; }
+  @keyframes nudge { 50% { transform: translateX(8px); } }
+  .intro { position: relative; width: 100%; height: 100%; overflow: hidden; display: flex; flex-direction: column; justify-content: center; padding: 0 12% 0 9%;
+    background: radial-gradient(ellipse at 30% 50%, #3a0a12, #0b0204 70%); }
+  .intro .slash { position: absolute; left: -10%; right: -10%; top: 46%; height: 26%; transform: rotate(-8deg);
+    background: linear-gradient(90deg, transparent, rgba(214,165,49,.85) 20%, rgba(214,165,49,.85) 80%, transparent); }
+  .intro .i-name { position: relative; font: clamp(22px, 4.2vw, 78px)/.95 "Bebas Neue", sans-serif; letter-spacing: .04em; color: #fff;
+    text-shadow: 4px 4px 0 #000, -2px -2px 0 #000; transform: rotate(-8deg); }
+  .intro .i-sub { position: relative; margin-top: 4%; font: italic clamp(12px, 1.5vw, 24px)/1.4 "Libre Baskerville", Georgia, serif; color: var(--paper); transform: rotate(-8deg); }
+  body[data-mode="book"] .page .inner:has(.teaser), body[data-mode="book"] .page .inner:has(.intro) { padding: 0; }
+  .slide .teaser, .slide .intro { width: min(100%, calc((100vh - var(--bar) - var(--foot) - 3vh) * 1.5)); height: auto; aspect-ratio: 3 / 2; }
+  .card.pause { background: #050403; }
+  .card.pause .dots { font: clamp(28px, 4vw, 64px)/1 "Bebas Neue", sans-serif; letter-spacing: .4em; color: var(--gold); opacity: .7; }
+  .slide.reveal { transition: opacity 1.6s ease; }
+  .slide.reveal.on img.panel { animation: reveal 2.2s ease-out both; }
+  @keyframes reveal { 0% { filter: brightness(3) saturate(0); transform: scale(1.18); } 35% { filter: brightness(1.4); } 100% { filter: none; transform: scale(1.025); } }
+  .flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 25; }
+  .flash.go { animation: flash .9s ease-out; }
+  @keyframes flash { 0% { opacity: 0; } 15% { opacity: .85; } 100% { opacity: 0; } }
+
+  /* Cinema */
+  #cinema-view { background: #000; }
+  .slide { position: absolute; inset: 0; opacity: 0; transition: opacity .7s ease; pointer-events: none; display: flex; align-items: center; justify-content: center; padding: 1.5vh 1.5vw; }
+  .slide.on { opacity: 1; pointer-events: auto; }
+  .slide img.panel { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; transform: scale(1); transition: transform 9s ease-out; }
+  .slide.on img.panel { transform: scale(1.025); }
+  .slide .unbox { width: min(100%, calc((100vh - var(--bar) - var(--foot) - 3vh) * 1.5)); height: auto; aspect-ratio: 3 / 2; }
+  .slide .card { max-width: calc((100vh - var(--bar) - var(--foot)) * 1.5); max-height: 100%; aspect-ratio: 3 / 2; height: auto; }
+
+  /* Footer timeline */
+  .foot { position: fixed; inset: auto 0 0 0; height: var(--foot); background: #000; display: flex; align-items: center; gap: 4px; padding: 0 20px; z-index: 20; }
+  .seg { flex: 1; height: 4px; border-radius: 2px; background: #3a332b; cursor: pointer; transition: background .3s; }
+  .seg.done { background: var(--gold); }
+  .seg.now { background: var(--paper); }
+  .gap { width: 12px; flex: none; }
+
+  canvas#confetti { position: fixed; inset: 0; pointer-events: none; z-index: 30; }
+
+  .rotate { display: none; position: fixed; left: 12px; right: 12px; bottom: calc(var(--foot) + 12px); z-index: 40; background: rgba(14,12,10,.95);
+    border: 1px solid rgba(241,230,207,.25); padding: 14px 16px; font-size: 14px; line-height: 1.45; border-radius: 10px; }
+  .rotate b { font: 18px "Bebas Neue", sans-serif; letter-spacing: .12em; font-weight: 400; color: var(--gold); }
+  .rotate button { margin-top: 10px; border: 1px solid var(--paper-dim); padding: 8px 14px; border-radius: 6px; font: 13px "Bebas Neue", sans-serif; letter-spacing: .2em; }
+
+  @media (max-width: 760px) {
+    .top { padding: 0 10px; } .chap i { display: none; } .count { display: none; }
+    .mode button { padding: 8px 10px; } .nav.next { padding: 0 12px; }
+    body[data-mode="cinema"] .rotate.show { display: block; }
+    .book-wrap { width: 94vw; }
+  }
+  @media (prefers-reduced-motion: reduce) { .slide, .slide img.panel { transition: none; } .slide.on img.panel { transform: none; } }
+</style>
+</head>
+<body data-mode="book">
+<header class="top">
+  <div class="chap" id="chap"></div>
+  <div class="ctrl">
+    <span class="count" id="count"></span>
+    <div class="mode" role="group" aria-label="View mode">
+      <button type="button" data-mode="book" aria-pressed="true">Buch</button>
+      <button type="button" data-mode="cinema" aria-pressed="false">Kino</button>
+    </div>
+    <button type="button" class="nav" id="prev" aria-label="Back">&larr;</button>
+    <button type="button" class="nav next" id="next"><span class="txt">Weiter&nbsp;</span>&rarr;</button>
+  </div>
+</header>
+
+<div class="stage">
+  <section class="view" id="book-view"><div class="book-wrap"><div id="book"></div></div></section>
+  <section class="view" id="cinema-view"></section>
+</div>
+<nav class="foot" id="foot" aria-label="Progress"></nav>
+<canvas id="confetti"></canvas>
+<div class="flash" id="flash"></div>
+<div class="rotate" id="rotate"><b>Turn your phone</b><br>The cinema mode is drawn for landscape.<br><button type="button" id="rotate-close">Got it</button></div>
+
+<script src="vendor/page-flip.browser.js"></script>
+<script>
+const DATA = {"title": "AVIN. MASTER OF BOTH ENDS", "scenes": [{"id": "P1", "chapter": "Prologue. Three homes", "narration": "AVIN. MASTER OF BOTH ENDS", "dialogue": [], "alt": "AVIN. MASTER OF BOTH ENDS", "img": "img/P1.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "P2", "chapter": "Prologue. Three homes", "narration": "Offenbach, 2010. Some kids play knights. He was born one.", "dialogue": [{"speaker": "Little Avin", "text": "Ich bin der Babo von Offenbach, wallah!", "en": "I'm the boss of Offenbach, I swear!"}], "alt": "Offenbach, 2010. Some kids play knights. He was born one.", "img": "img/P2.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "P3", "chapter": "Prologue. Three homes", "narration": "Offenbach, 2010. An Iranian kid between tower blocks and kebab shops.", "dialogue": [{"speaker": "Little Avin", "text": "Yallah, gib Ball, wallah ich treff!", "en": "Come on, pass the ball, I swear I'll score!"}], "alt": "Offenbach, 2010. An Iranian kid between tower blocks and kebab shops.", "img": "img/P3.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "P4", "chapter": "Prologue. Three homes", "narration": "There he learned the language of the streets.", "dialogue": [{"speaker": "Little Avin", "text": "Einmal Döner mit alles, Bruder, aber mach scharf!", "en": "One kebab with everything, brother, but make it spicy!"}], "alt": "There he learned the language of the streets.", "img": "img/P4.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "P5", "chapter": "Prologue. Three homes", "narration": "Every hood has a plug. Offenbach had the Saffron Plug.", "dialogue": [{"speaker": "Customer", "text": "Bruder, hast du was da?", "en": "Brother, got anything?"}, {"speaker": "Avin", "text": "Nur das Beste. Direkt aus dem Iran.", "en": "Only the best. Straight from Iran."}], "alt": "Every hood has a plug. Offenbach had the Saffron Plug.", "img": "img/P5.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "P6", "chapter": "Prologue. Three homes", "narration": "2013. Then came the news: London.", "dialogue": [{"speaker": "Offenbach crew", "text": "Vergiss uns nicht, Ahi. Wallah.", "en": "Don't forget us, brother. I swear."}], "alt": "2013. Then came the news: London.", "img": "img/P6.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "P7", "chapter": "Prologue. Three homes", "narration": "London, 2013. New ends, new mandem, same hustle.", "dialogue": [{"speaker": "Roadman", "text": "Wagwan, cuz. You're one of us now, you get me?"}], "alt": "London, 2013. New ends, new mandem, same hustle.", "img": "img/P7.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "P8", "chapter": "Prologue. Three homes", "narration": null, "dialogue": [{"speaker": "Roadman", "text": "Swear down?"}, {"speaker": "Avin", "text": "Wallah."}, {"speaker": "Roadman", "text": "Wallahi, we say that too, bruv!"}], "alt": "Language exchange at a London bus stop at night, a few years later. Teenage Avin (face from the teenage photo) stands in the middle like a teacher, the Mandem United crew on a benc", "img": "img/P8.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "P9", "chapter": "Prologue. Three homes", "narration": "Late 2010s. In London they called him the Food Man.", "dialogue": [{"speaker": "Customer", "text": "You got food, bruv?"}, {"speaker": "Avin", "text": "Mans always got food. Scotch bonnet, allspice, thyme. Pure."}], "alt": "Late 2010s. In London they called him the Food Man.", "img": "img/P9.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "1.1", "chapter": "Chapter 1. The quiet life", "narration": "Then he moved to Switzerland. And locked the past away.", "dialogue": [{"speaker": "Avin", "text": "Chalas. Neues Leben.", "en": "Enough. New life."}], "alt": "Then he moved to Switzerland. And locked the past away.", "img": "img/1.1.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "1.2", "chapter": "Chapter 1. The quiet life", "narration": "Stettbach. Trains on time. Streets clean. Nothing ever happens.", "dialogue": [], "alt": "Stettbach. Trains on time. Streets clean. Nothing ever happens.", "img": "img/1.2.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "1.3", "chapter": "Chapter 1. The quiet life", "narration": "Now he is a DevOps Engineer with low cortisol.", "dialogue": [], "alt": "Now he is a DevOps Engineer with low cortisol.", "img": "img/1.3.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "1.4", "chapter": "Chapter 1. The quiet life", "narration": null, "dialogue": [{"speaker": "Colleague", "text": "Alles ruhig heute?", "en": "All quiet today?"}, {"speaker": "Avin", "text": "Too quiet."}], "alt": "Same office. A colleague, seen only from behind, passes Avin's desk with a coffee mug. Avin leans back in his chair, looking out of the window over Zurich with a slightly suspiciou", "img": "img/1.4.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "2.1", "chapter": "Chapter 2. The conflict", "narration": "Zurich, Letzigrund stadium. A friendly match: Chabo FC vs Mandem United. Nobody knew how unfriendly it would get.", "dialogue": [], "alt": "Zurich, Letzigrund stadium. A friendly match: Chabo FC vs Mandem United. Nobody knew how unfriendly it would get.", "img": "img/2.1.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "2.2", "chapter": "Chapter 2. The conflict", "narration": null, "dialogue": [{"speaker": "Manuellsen", "text": "Wer war das?! Ich schwör, ich mach euch alle fertig!", "en": "Who did that?! I swear I'll finish all of you!"}], "alt": "Food stand at the Letzigrund stadium. Extreme slow-motion close-up: a single fat drop of white yoghurt sauce falls from a koobideh kebab plate held by a blurred fan and lands on th", "img": "img/2.2.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "2.3", "chapter": "Chapter 2. The conflict", "narration": null, "dialogue": [{"speaker": "Chabo FC", "text": "Was guckst du, Lauch? Chalas jetzt!", "en": "What are you looking at, weakling? Enough now!"}, {"speaker": "Mandem United", "text": "Allow it, bruv. You lot are moving peak. Wasteman ting."}], "alt": "Stadium stands split down the middle. Left: Chabo FC crew in red and black, chests out, pointing. Right: Mandem United crew in purple and gold with shiesty masks, arms wide. Faces ", "img": "img/2.3.jpg", "reveal": true, "teaser": "Under the crown, a face nobody in Zurich had ever seen.", "caption": "KÖNIG MANUELLSEN", "subtitle": "President of Chabo FC. King of Frankfurt. Owner of one ruined shoe."}, {"id": "2.4", "chapter": "Chapter 2. The conflict", "narration": "And so the war began.", "dialogue": [], "alt": "And so the war began.", "img": "img/2.4.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "2.5", "chapter": "Chapter 2. The conflict", "narration": "By nightfall, Zurich was a city of sauce.", "dialogue": [], "alt": "By nightfall, Zurich was a city of sauce.", "img": "img/2.5.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "3.1", "chapter": "Chapter 3. The awakening", "narration": "Then the alert came.", "dialogue": [], "alt": "Then the alert came.", "img": "img/3.1.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "3.2", "chapter": "Chapter 3. The awakening", "narration": null, "dialogue": [{"speaker": "Avin", "text": "Allow it."}], "alt": "Dramatic close-up. Avin rolls up the sleeves of his white shirt, jaw set, his eyes begin to glow golden. Wind blows through the office, papers flying. This is only the first sign: ", "img": "img/3.2.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "3.3", "chapter": "Chapter 3. The awakening", "narration": null, "dialogue": [], "alt": "Flashback flicker panel with glitch effect. The wardrobe door from his apartment bursts open: tech fleece tracksuits, shark sneakers, bum bags, gold chains, a tiny pocket scale and", "img": "img/3.3.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "3.4", "chapter": "Chapter 3. The awakening", "narration": "Only one man ever mastered both elements. The Kanak and the Mandem. The Master of Both Ends.", "dialogue": [], "alt": "Only one man ever mastered both elements. The Kanak and the Mandem. The Master of Both Ends.", "img": "img/3.4.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "3.5", "chapter": "Chapter 3. The awakening", "narration": "And then he ascended.", "dialogue": [], "alt": "And then he ascended.", "img": "img/3.5.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "4.1", "chapter": "Chapter 4. The redemption", "narration": null, "dialogue": [{"speaker": "Avin", "text": "Wallah means swear down. Inshallah means mi soon come. Ahi means bruv."}], "alt": "Avin floats exactly between the two rival adult crews on the Letzigrund pitch, one hand toward Chabo FC and one toward Mandem United as a translator between two worlds. Final awake", "img": "img/4.1.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "4.2", "chapter": "Chapter 4. The redemption", "narration": null, "dialogue": [{"speaker": "Chabo FC", "text": "Bruder ... wir sind ja gleich.", "en": "Brother ... we're the same."}, {"speaker": "Mandem United", "text": "Rah. Say no more."}], "alt": "Comedy reveal in a single graphic-novel panel: awakened Avin points at the crews' clothing. They open their otherwise varied red/black and purple/gold layers to reveal the SAME gre", "img": "img/4.2.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "4.3", "chapter": "Chapter 4. The redemption", "narration": "That night, koobideh met jerk chicken. Ayran met Wray & Nephew. And Zurich was at peace.", "dialogue": [], "alt": "That night, koobideh met jerk chicken. Ayran met Wray & Nephew. And Zurich was at peace.", "img": "img/4.3.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "F1", "chapter": "Finale", "narration": null, "dialogue": [{"speaker": "Chabo FC captain", "text": "Alles Gute zum 25., König.", "en": "Happy 25th birthday, King."}, {"speaker": "Mandem United captain", "text": "Big up, my G."}], "alt": "Coronation on the pitch, confetti in red, black, purple and gold. The captain of Chabo FC and the captain of Mandem United (shiesty mask) place a golden crown on Avin's head togeth", "img": "img/F1.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "F2", "chapter": "Finale", "narration": "The next morning, the Master of Both Ends was back at his desk. Every pipeline green.", "dialogue": [], "alt": "The next morning, the Master of Both Ends was back at his desk. Every pipeline green.", "img": "img/F2.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}, {"id": "F3", "chapter": "Finale", "narration": null, "dialogue": [], "alt": "End title. A huge wall at night lit by street lights, freshly sprayed graffiti in wild colourful street-art lettering in red, black, purple and gold. In front of the wall the whole", "img": "img/F3.jpg", "reveal": false, "teaser": "", "caption": "", "subtitle": ""}], "photos": [{"src": "photos/02_kind_ritterkostuem.jpg", "thought": "Knight of Offenbach. Undefeated. The vacuum cleaner never stood a chance.", "tpl": {"src": "img/pov_hands_1.jpg", "box": {"left": 22.77, "top": 8.87, "width": 26.66, "height": 47.98}}}, {"src": "photos/01_teenager_restaurant.jpg", "thought": "First moustache. Thought I was the hardest man in London. I was fourteen.", "tpl": {"src": "img/pov_hands_2.jpg", "box": {"left": 22.77, "top": 8.87, "width": 26.66, "height": 47.88}}}, {"src": "photos/01_frontal.jpg", "thought": "This face survived Offenbach and London. Switzerland won't break it.", "tpl": {"src": "img/pov_hands_1.jpg", "box": {"left": 22.77, "top": 8.87, "width": 26.66, "height": 47.98}}}, {"src": "photos/02_frontal_imbiss.jpg", "thought": "The beard always saves a little for later.", "tpl": {"src": "img/pov_hands_2.jpg", "box": {"left": 22.77, "top": 8.87, "width": 26.66, "height": 47.88}}}, {"src": "photos/03_laecheln_cap.jpg", "thought": "Durag under a cap. Peak fashion. Don't ask.", "tpl": {"src": "img/pov_hands_1.jpg", "box": {"left": 22.77, "top": 8.87, "width": 26.66, "height": 47.98}}}, {"src": "photos/04_profil_gipfeli.jpg", "thought": "Swiss life, day one. The croissant is mine now.", "tpl": {"src": "img/pov_hands_2.jpg", "box": {"left": 22.77, "top": 8.87, "width": 26.66, "height": 47.88}}}, {"src": "photos/01_gesicht_im_loch.jpg", "thought": "Don't remember this one. Better that way.", "tpl": {"src": "img/pov_hands_1.jpg", "box": {"left": 22.77, "top": 8.87, "width": 26.66, "height": 47.98}}}, {"src": "photos/02_schwimmbrille.jpg", "thought": "Goggles on. Problems off.", "tpl": {"src": "img/pov_hands_2.jpg", "box": {"left": 22.77, "top": 8.87, "width": 26.66, "height": 47.88}}}, {"src": "photos/03_thermalbad.jpg", "thought": "Low cortisol arc. Episode one.", "tpl": {"src": "img/pov_hands_1.jpg", "box": {"left": 22.77, "top": 8.87, "width": 26.66, "height": 47.98}}}, {"src": "photos/04_trinkflasche_pose.jpg", "thought": "Hydrated. Unbothered. Untouchable.", "tpl": {"src": "img/pov_hands_2.jpg", "box": {"left": 22.77, "top": 8.87, "width": 26.66, "height": 47.88}}}], "wall_after": "1.1", "unbox_intro": "Unpacking. One box he couldn't lock away.", "date": "06.11.2026  ·  25"};
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+
+/* ---------- Sequence: one list for both modes ---------- */
+function splitChapter(name) {
+  const m = String(name || "").match(/^(Chapter \d+|Prologue|Finale)\.?\s*(.*)$/i);
+  return m ? [m[1], m[2]] : [name || "", ""];
+}
+const items = [];
+let last = null;
+DATA.scenes.forEach((s, i) => {
+  if (i === 0) { items.push({ kind: "cover", scene: s, chapter: s.chapter }); return; }
+  if (s.chapter && s.chapter !== last) { items.push({ kind: "chapter", chapter: s.chapter }); last = s.chapter; }
+  if (s.reveal) {
+    /* Reveal: lands on the back of a turning page (odd index = left page) and stands alone */
+    if (items.length % 2 === 0) items.push({ kind: "teaser", scene: s, chapter: s.chapter });
+    items.push({ kind: "panel", scene: s, chapter: s.chapter, reveal: true });
+    items.push({ kind: "intro", scene: s, chapter: s.chapter });
+  } else items.push({ kind: "panel", scene: s, chapter: s.chapter });
+  if (s.id === DATA.wall_after) DATA.photos.forEach((ph, k) => items.push({ kind: "photo", photo: ph, first: k === 0, chapter: s.chapter }));
+});
+items.push({ kind: "end", chapter: items[items.length - 1].chapter });
+const N = items.length;
+
+function content(item) {
+  if (item.kind === "cover" || item.kind === "panel") {
+    const s = item.scene;
+    if (s.img) return `<img class="${item.kind === "cover" ? "cover" : "panel"}" src="${s.img}" alt="${esc(s.alt)}" loading="lazy" decoding="async">`;
+    const lines = [s.narration, ...(s.dialogue || []).map(d => `${d.speaker}: ${d.text}`)].filter(Boolean).map(esc).join("<br>");
+    return `<div class="card chapter"><div class="num" style="font-size:clamp(28px,4vw,72px)">${esc(s.id)}</div><div class="name">${lines}</div></div>`;
+  }
+  if (item.kind === "chapter") { const [a, b] = splitChapter(item.chapter);
+    return `<div class="card chapter"><div class="num">${esc(a)}</div>${b ? `<div class="name">${esc(b)}</div>` : ""}<div class="rule"></div></div>`; }
+  if (item.kind === "photo") { const ph = item.photo, t = ph.tpl;
+    const intro = item.first && DATA.unbox_intro ? `<div class="unbox-intro">${esc(DATA.unbox_intro)}</div>` : "";
+    const bubble = `<div class="thought">${esc(ph.thought)}</div>`;
+    if (t) { const b = t.box;
+      return `<div class="unbox"><img class="tpl" src="${t.src}" alt="" loading="lazy"><img class="orig" src="${ph.src}" alt="Original photo of Avin" loading="lazy" style="left:${b.left}%;top:${b.top}%;width:${b.width}%;height:${b.height}%">${intro}${bubble}</div>`; }
+    return `<div class="unbox fallback"><div class="card-photo"><img src="${ph.src}" alt="Original photo of Avin" loading="lazy"></div>${intro}${bubble}</div>`; }
+  if (item.kind === "teaser") { const s = item.scene;
+    return `<div class="teaser">${s.img ? `<img src="${s.img}" alt="" loading="lazy">` : ""}<div class="t-text">${esc(s.teaser || "Turn the page.")}</div><div class="t-turn">Turn the page &rarr;</div></div>`; }
+  if (item.kind === "intro") { const s = item.scene;
+    return `<div class="intro"><div class="slash"></div><div class="i-name">${esc(s.caption)}</div><div class="i-sub">${esc(s.subtitle)}</div></div>`; }
+  if (item.kind === "end") return `<div class="card end"><div class="date">${esc(DATA.date)}</div><div class="small">${esc(DATA.title)}</div></div>`;
+  return "";
+}
+
+/* ---------- Header + footer ---------- */
+let current = 0;
+const foot = $("#foot");
+let prevChap = null;
+const segs = items.map((it, i) => {
+  if (i > 0 && it.chapter !== prevChap) foot.appendChild(Object.assign(document.createElement("span"), { className: "gap" }));
+  prevChap = it.chapter;
+  const s = document.createElement("span"); s.className = "seg"; s.title = `${i + 1} / ${N}`;
+  s.onclick = () => go(i); foot.appendChild(s); return s;
+});
+function updateUI() {
+  const [a, b] = splitChapter(items[current].chapter);
+  $("#chap").innerHTML = `${esc(a)}${b ? `<i>${esc(b)}</i>` : ""}`;
+  $("#count").textContent = `${current + 1} / ${N}`;
+  $("#prev").disabled = current === 0;
+  $("#next").disabled = current >= N - 1;
+  segs.forEach((s, i) => { s.classList.toggle("done", i < current); s.classList.toggle("now", i === current); });
+  if (current >= N - 2) confetti();
+  flash(current);
+  const wrap = $(".book-wrap"); const pages = book ? book.getPageCount() : 0;
+  const idx = book ? book.getCurrentPageIndex() : current;
+  wrap.classList.toggle("front", mode() === "book" && idx === 0);
+  wrap.classList.toggle("backside", mode() === "book" && book && idx >= pages - 1);
+  store.set("avin-page", current);
+}
+
+/* ---------- Cinema ---------- */
+const cine = $("#cinema-view");
+const slides = items.map(it => { const d = document.createElement("div"); d.className = "slide" + (it.reveal ? " reveal" : ""); d.innerHTML = content(it); cine.appendChild(d); return d; });
+const revealed = new Set();
+function flash(i) { if (!items[i]?.reveal || revealed.has(i) || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  revealed.add(i); const f = $("#flash"); f.classList.remove("go"); void f.offsetWidth; f.classList.add("go"); }
+function showCinema(i) { slides.forEach((s, k) => s.classList.toggle("on", k === i));
+  [i - 1, i + 1, i + 2].forEach(k => slides[k]?.querySelectorAll("img").forEach(img => img.loading = "eager")); }
+
+/* ---------- Book ---------- */
+const bookEl = $("#book");
+items.forEach((it, i) => {
+  const p = document.createElement("div");
+  const hard = it.kind === "cover" || it.kind === "end";
+  p.className = "page" + (hard ? " hard" : "") + (it.kind === "end" ? " back" : "");
+  if (hard) p.dataset.density = "hard";
+  p.innerHTML = it.kind === "cover" || it.kind === "end" ? content(it) : `<div class="inner">${content(it)}</div><div class="pnum">${i + 1}</div>`;
+  if (it.kind === "photo") p.querySelector(".inner").style.padding = "2.2%";
+  bookEl.appendChild(p);
+});
+/* even page count so the back cover closes the book */
+if (N % 2 === 1) { const back = bookEl.lastElementChild; const blank = document.createElement("div"); blank.className = "page"; bookEl.insertBefore(blank, back); }
+
+let book = null;
+function initBook() {
+  if (book || typeof St === "undefined") return;
+  book = new St.PageFlip(bookEl, {
+    width: 750, height: 500, size: "stretch", minWidth: 280, maxWidth: 750, minHeight: 187, maxHeight: 500,
+    showCover: true, usePortrait: true, maxShadowOpacity: .55, flippingTime: 900, mobileScrollSupport: false,
+  });
+  book.loadFromHTML(bookEl.querySelectorAll(".page"));
+  book.on("flip", e => { current = Math.min(e.data, N - 1); updateUI(); });
+}
+
+/* ---------- Navigation ---------- */
+function mode() { return document.body.dataset.mode; }
+function go(i) {
+  i = Math.max(0, Math.min(N - 1, i));
+  if (mode() === "book" && book) book.turnToPage(i);
+  else showCinema(i);
+  current = i; updateUI();
+}
+function next() { if (mode() === "book" && book) book.flipNext(); else go(current + 1); }
+function prev() { if (mode() === "book" && book) book.flipPrev(); else go(current - 1); }
+$("#next").onclick = next; $("#prev").onclick = prev;
+addEventListener("keydown", e => {
+  if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") { e.preventDefault(); next(); }
+  if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); prev(); }
+});
+let tx = null;
+cine.addEventListener("touchstart", e => tx = e.touches[0].clientX, { passive: true });
+cine.addEventListener("touchend", e => { if (tx == null) return; const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 40) (dx < 0 ? next : prev)(); tx = null; });
+cine.addEventListener("click", e => { (e.clientX > innerWidth / 3 ? next : prev)(); });
+
+function setMode(m) {
+  document.body.dataset.mode = m; store.set("avin-mode", m);
+  document.querySelectorAll(".mode button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === m)));
+  if (m === "book") { initBook(); book && book.turnToPage(current); }
+  else showCinema(current);
+  updateUI();
+}
+document.querySelectorAll(".mode button").forEach(b => b.onclick = () => setMode(b.dataset.mode));
+
+/* ---------- Rotate hint ---------- */
+const rot = $("#rotate");
+if (!store.get("avin-rot") && matchMedia("(orientation: portrait)").matches) rot.classList.add("show");
+$("#rotate-close").onclick = () => { rot.classList.remove("show"); store.set("avin-rot", "1"); };
+
+/* ---------- Confetti on the last pages ---------- */
+let fired = false;
+function confetti() {
+  if (fired || matchMedia("(prefers-reduced-motion: reduce)").matches) return; fired = true;
+  const cv = $("#confetti"), cx = cv.getContext("2d"); cv.width = innerWidth; cv.height = innerHeight;
+  const colors = ["#c8102e", "#0e0c0a", "#6a2fa0", "#d6a531", "#f1e6cf"];
+  let parts = Array.from({ length: 220 }, () => ({ x: Math.random() * cv.width, y: -20 - Math.random() * cv.height * .5,
+    w: 6 + Math.random() * 6, h: 10 + Math.random() * 8, vy: 2 + Math.random() * 3, vx: -1 + Math.random() * 2,
+    r: Math.random() * 6, vr: -.15 + Math.random() * .3, c: colors[(Math.random() * colors.length) | 0] }));
+  (function tick() {
+    cx.clearRect(0, 0, cv.width, cv.height);
+    parts.forEach(p => { p.y += p.vy; p.x += p.vx; p.r += p.vr; cx.save(); cx.translate(p.x, p.y); cx.rotate(p.r); cx.fillStyle = p.c; cx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); cx.restore(); });
+    parts = parts.filter(p => p.y < cv.height + 40);
+    if (parts.length) requestAnimationFrame(tick); else cx.clearRect(0, 0, cv.width, cv.height);
+  })();
+}
+
+/* ---------- Start ---------- */
+const saved = parseInt(store.get("avin-page"), 10);
+current = Number.isFinite(saved) && saved < N ? saved : 0;
+setMode(store.get("avin-mode") === "cinema" ? "cinema" : "book");
+if (mode() === "book" && book && current) book.turnToPage(current);
+</script>
+</body>
+</html>
